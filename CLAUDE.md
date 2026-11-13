@@ -26,8 +26,7 @@ Non-default config in `next.config.ts` that affects how code must be written:
 
 ## Spec Kit
 
-The project is set up with Spec Kit 1.4.0 (Claude integration, PowerShell scripts). Workflow is driven by the `speckit-*` skills in `.claude/skills` (constitution → specify → clarify → plan → tasks → analyze → implement). Templates, scripts and the workflow definition live in `.specify/`. `.specify/memory/constitution.md` is still the unfilled template; run `speckit-constitution` to populate it before relying on it.
-
+The project is set up with Spec Kit 1.4.0 (Claude integration, PowerShell scripts). Workflow is driven by the `speckit-*` skills in `.claude/skills` (constitution → specify → clarify → plan → tasks → analyze → implement). Templates, scripts and the workflow definition live in `.specify/`.
 ## Working with me
 
 I'm learning. Explain your reasoning in simple English. Product and engineering rules live in .specify/memory/constitution.md — don't repeat them here.
