@@ -68,7 +68,7 @@ Single Next.js App Router project. New logic in `app/notes.ts`; UI in `app/page.
   - Anything else (invalid JSON, not an object, no `notes` array, `version` other than 1) -> FIRST write the original string, unchanged, to `localStorage` key `` `mkeni.notes.backup-${note.savedAt}` ``; only if that backup write succeeds, write `{ "version": 1, "notes": [note] }` to `mkeni.notes`. If the backup write fails, do NOT overwrite `mkeni.notes`; return `{ ok: false }`.
   - After a successful write, call `window.dispatchEvent(new Event("mkeni-notes-changed"))`.
   - Wrap all storage access in try/catch; return `{ ok: false }` if anything throws (storage full or unavailable), and never throw.
-- [X] T009 [US1] In `app/page.tsx` add the form: a text `<input>` (label it, with a placeholder like `bayad kuryente sa Nov 15`) and a `Save` button, inside a `<form onSubmit>` so that Enter and the button both save (FR-001). On submit: `trim()` the text; if empty -> show "Please type a note first." and stop. Call `findDate(text, new Date())` (this is the only place "today" is created); `reason: "none"` -> show "Please include a date, like Nov 15."; `reason: "impossible"` -> show "That date isn't a real date. Please check it." (a different message). On success call `addNote({ text, date, savedAt: Date.now() })`. If it returns `{ ok: true }`, clear the input and any message. If it returns `{ ok: false }`, keep the typed text in the input (so nothing the user typed is lost) and show "Couldn't save. Your notes may not be kept after you leave this page." (US3 later keeps such a note visible for the current visit.) Keep the message in `useState`, shown in a line under the form (use `role="alert"`).
+- [X] T009 [US1] In `app/page.tsx` add the form: a text `<input>` (label it, with a placeholder like `bayad kuryente sa Nov 15`) and a `Save` button, inside a `<form onSubmit>` so that Enter and the button both save (FR-001). On submit: `trim()` the text; if empty -> show "Please type a note first." and stop. Call `findDate(text, new Date())` (this is the only place "today" is created); `reason: "none"` -> show "Please include a date, like Nov 15."; `reason: "impossible"` -> show "That date isn't a real date. Please check it." (a different message). On success call `addNote({ text, date, savedAt: Date.now() })`. If it returns `{ ok: true }`, clear the input and any message. If it returns `{ ok: false }`, show "Couldn't save. Your notes may not be kept after you leave this page." (T014 later keeps such a note visible for the current visit and clears the input, so nothing the user typed is lost.) Keep the message in `useState`, shown in a line under the form (use `role="alert"`).
 - [X] T010 [US1] In `app/page.tsx` render each note from `notes` as a list item showing the note text and its date formatted from the ISO string, like `Nov 15, 2026`, using a plain month-name array (not `toLocaleDateString`, which would differ between server and browser). Add `break-words` so long notes wrap (spec edge case). Order is added in US2.
 
 **Checkpoint**: Quickstart #1-#4, #9, #11, #12 pass. Saving shows the note immediately without a reload (SC-002). Because `addNote` is already safe, #15, #17, #19 and #20 (save over damaged data) can already be checked here, and the app never overwrites unreadable data at any point.
@@ -83,7 +83,7 @@ Single Next.js App Router project. New logic in `app/notes.ts`; UI in `app/page.
 
 - [X] T011 [US2] In `app/page.tsx` sort the displayed notes by `date` ascending before rendering: use `[...notes].sort((a, b) => a.date.localeCompare(b.date))` inside the `useMemo`. `Array.prototype.sort` is stable, and notes are stored in saved order, so same-date notes keep saved order (FR-007). Do not reorder or rewrite the stored array.
 - [X] T012 [US2] In `app/page.tsx`, when notes are loaded and the list is empty, show an empty-state message such as "Nothing upcoming yet. Add a note with a date above." (FR-011). Show nothing while loading (`raw === undefined`).
-- [ ] T013 [US2] Run quickstart #5-#8 and #10 by hand in the browser and fix anything that does not match. Past-year notes (#10) must be saved and shown at the top.
+- [x] T013 [US2] Run quickstart #5-#8 and #10 by hand in the browser and fix anything that does not match. Past-year notes (#10) must be saved and shown at the top.
 
 **Checkpoint**: Stories 1 and 2 both work. SC-003 holds for a mixed 20-note list.
 
@@ -95,8 +95,8 @@ Single Next.js App Router project. New logic in `app/notes.ts`; UI in `app/page.
 
 **Independent Test**: Quickstart #13-#20.
 
-- [X] T014 [US3] In `app/page.tsx`, when `addNote` returns `{ ok: false }` (the message and the kept input text already exist from T009), also keep the note visible for the current visit: hold unsaved notes in a `useState` array, merge them into the displayed list (sorted with the rest), and clear the input since the note is now shown. This is the spec edge case "the app keeps working for the current visit". It MUST NOT write anything to storage itself.
-- [ ] T015 [US3] Verify by hand: quickstart #13 (reload keeps order), #14 and #15 (invalid JSON, without and with a save), #16 and #17 (one junk item inside `notes`; it must still be in storage after a save), #18 and #19 (version 2 value), #20 (saved format). Fix any mismatch.
+- [X] T014 [US3] In `app/page.tsx`, when `addNote` returns `{ ok: false }` (the message already exists from T009), also keep the note visible for the current visit: hold unsaved notes in a `useState` array, merge them into the displayed list (sorted with the rest), and clear the input since the note is now shown. This is the spec edge case "the app keeps working for the current visit". It MUST NOT write anything to storage itself.
+- [x] T015 [US3] Verify by hand: quickstart #13 (reload keeps order), #14 and #15 (invalid JSON, without and with a save), #16 and #17 (one junk item inside `notes`; it must still be in storage after a save), #18 and #19 (version 2 value), #20 (saved format). Fix any mismatch.
 
 **Checkpoint**: All three stories work; SC-004 and SC-005 hold.
 
@@ -106,8 +106,8 @@ Single Next.js App Router project. New logic in `app/notes.ts`; UI in `app/page.
 
 - [X] T016 Run `npm run lint` and `npx tsc --noEmit`; fix every error and warning in `app/notes.ts`, `app/page.tsx`, `app/layout.tsx`.
 - [X] T017 Run `npm run build` and confirm it succeeds under `cacheComponents` (no error about reading time or browser APIs during prerender).
-- [ ] T018 Go through every row of [quickstart.md](./quickstart.md) once more on a clean `localStorage.clear()` and tick them off.
-- [ ] T019 Simplicity check against the constitution: no new packages in `package.json`, no files besides `app/notes.ts`, `app/page.tsx`, `app/layout.tsx` changed, no edit/delete/search added, and no network calls anywhere (search the code for `fetch(`, `XMLHttpRequest`, `sendBeacon`, `WebSocket`; FR-012). Remove anything extra. Then run the `spec-reviewer` subagent before committing.
+- [x] T018 Go through every row of [quickstart.md](./quickstart.md) once more on a clean `localStorage.clear()` and tick them off.
+- [x] T019 Simplicity check against the constitution: no new packages in `package.json`, no files besides `app/notes.ts`, `app/page.tsx`, `app/layout.tsx` changed, no edit/delete/search added, and no network calls anywhere (search the code for `fetch(`, `XMLHttpRequest`, `sendBeacon`, `WebSocket`; FR-012). Remove anything extra. Then run the `spec-reviewer` subagent before committing.
 
 ---
 
@@ -117,7 +117,7 @@ Single Next.js App Router project. New logic in `app/notes.ts`; UI in `app/page.
 - Strictly sequential on purpose: every task edits `app/notes.ts` or `app/page.tsx`, so there is nothing safe to run in parallel.
 - US2 builds on US1's list rendering (T010). US3 builds on T008/T009 (it adds the in-visit fallback, T014, and the verification pass, T015).
 - Within Phase 3: T007 and T008 (both `app/notes.ts`) before T009 and T010 (both `app/page.tsx`).
-- **Principle IV holds after every task**: the read path (T003-T006) is read-only and never throws, and the only writer, `addNote` (T008), is safe from the moment it exists (preserves unreadable entries, backs up an unreadable value before replacing it). No later task is needed to make saving safe, and T009 keeps the typed text if a save fails.
+- **Principle IV holds after every task**: the read path (T003-T006) is read-only and never throws, and the only writer, `addNote` (T008), is safe from the moment it exists (preserves unreadable entries, backs up an unreadable value before replacing it). No later task is needed to make saving safe, and T014 keeps the note visible for the current visit if a save fails.
 
 ## Implementation strategy
 
